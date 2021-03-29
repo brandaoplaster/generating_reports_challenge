@@ -1,18 +1,10 @@
 defmodule GeneratingReportsChallenge do
-  @moduledoc """
-  Documentation for `GeneratingReportsChallenge`.
-  """
+  alias GeneratingReportsChallenge.Parser
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> GeneratingReportsChallenge.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def build(file_name) do
+    file_name
+    |> Parser.parse_file()
+    |> Enum.map(fn line -> IO.inspect(line) end)
   end
+
 end
