@@ -1,7 +1,7 @@
 defmodule GeneratingReportsChallenge do
   alias GeneratingReportsChallenge.Parser
 
-  @available_month [
+  @months [
     "janeiro",
     "fevereiro",
     "março",
@@ -29,7 +29,7 @@ defmodule GeneratingReportsChallenge do
     "Danilo"
   ]
 
-  def build(file_name) do
+  def call(file_name) do
     file_name
     |> Parser.parse_file()
     |> Enum.reduce(report_acc(), fn line, report ->
@@ -43,28 +43,43 @@ defmodule GeneratingReportsChallenge do
          "hours_per_year" => hours_per_year
        }) do
     all_hours = Map.put(all_hours, name, all_hours[name] + quantity)
-    hours_per_month = Map.put(hours_per_month, name, sum_hours_month(hours_per_month[name], month, quantity))
-    hours_per_year = Map.put(hours_per_year, name, sum_hours_month(hours_per_year[name], year, quantity))
 
-    %{
-      "all_hours" => all_hours,
-      "hours_per_month" => hours_per_month,
-      "hours_per_year" => hours_per_year
-    }
+    hours_per_month =
+      Map.put(
+        hours_per_month,
+        name,
+        put_sub_maps(hours_per_month[name], set_month(month), quantity)
+      )
+
+    hours_per_year =
+      Map.put(hours_per_year, name, put_sub_maps(hours_per_year[name], year, quantity))
+
+    build_report(all_hours, hours_per_month, hours_per_year)
   end
 
-  defp sum_hours_month(map, month, quantity) do
-    Map.put(map, month, map[month] + quantity)
+  defp put_sub_maps(map, key, quantity) do
+    Map.put(map, key, map[key] + quantity)
+  end
+
+  defp set_month(number_month) do
+    case number_month in 1..12 do
+      true -> Enum.at(@months, number_month - 1)
+      _ -> {:error, "Month invalid"}
+    end
   end
 
   defp report_acc do
-    month = Enum.into(1..12, %{}, &{&1, 0})
+    months = Enum.into(@months, %{}, &{&1, 0})
     year = Enum.into(2016..2020, %{}, &{&1, 0})
 
-    hours_per_month = Enum.into(@user_list, %{}, &{&1, month})
+    hours_per_month = Enum.into(@user_list, %{}, &{&1, months})
     all_hours = Enum.into(@user_list, %{}, &{&1, 0})
     hours_per_year = Enum.into(@user_list, %{}, &{&1, year})
 
+    build_report(all_hours, hours_per_month, hours_per_year)
+  end
+
+  def build_report(all_hours, hours_per_month, hours_per_year) do
     %{
       "all_hours" => all_hours,
       "hours_per_month" => hours_per_month,
