@@ -37,12 +37,13 @@ defmodule GeneratingReportsChallenge do
     end)
   end
 
-  defp sum_hours([name, quantity, _day, _month, _year], %{
+  defp sum_hours([name, quantity, _day, month, _year], %{
          "all_hours" => all_hours,
          "hours_per_month" => hours_per_month,
          "hours_per_year" => hours_per_year
        }) do
     all_hours = Map.put(all_hours, name, all_hours[name] + quantity)
+    hours_per_month = Map.put(hours_per_month, name, sum_hours_month(hours_per_month[name], month, quantity))
 
     %{
       "all_hours" => all_hours,
@@ -51,8 +52,12 @@ defmodule GeneratingReportsChallenge do
     }
   end
 
+  defp sum_hours_month(map, month, quantity) do
+    Map.put(map, month, map[month] + quantity)
+  end
+
   defp report_acc do
-    month = Enum.into(@available_month, %{}, &{&1, 0})
+    month = Enum.into(1..12, %{}, &{&1, 0})
     year = Enum.into(2016..2020, %{}, &{&1, 0})
 
     hours_per_month = Enum.into(@user_list, %{}, &{&1, month})
