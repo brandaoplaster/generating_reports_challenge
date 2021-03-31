@@ -37,13 +37,14 @@ defmodule GeneratingReportsChallenge do
     end)
   end
 
-  defp sum_hours([name, quantity, _day, month, _year], %{
+  defp sum_hours([name, quantity, _day, month, year], %{
          "all_hours" => all_hours,
          "hours_per_month" => hours_per_month,
          "hours_per_year" => hours_per_year
        }) do
     all_hours = Map.put(all_hours, name, all_hours[name] + quantity)
     hours_per_month = Map.put(hours_per_month, name, sum_hours_month(hours_per_month[name], month, quantity))
+    hours_per_year = Map.put(hours_per_year, name, sum_hours_month(hours_per_year[name], year, quantity))
 
     %{
       "all_hours" => all_hours,
