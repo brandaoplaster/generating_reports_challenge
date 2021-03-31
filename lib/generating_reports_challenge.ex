@@ -33,19 +33,36 @@ defmodule GeneratingReportsChallenge do
     file_name
     |> Parser.parse_file()
     |> Enum.reduce(report_acc(), fn line, report ->
-      sum_all_hours(line, report)
+      sum_hours(line, report)
     end)
   end
 
-  defp sum_all_hours([name, quantity, day, month, year], %{"users" => users} = report) do
-    users = Map.put(users, name, users[name] + quantity)
-    %{"users" => users}
+  defp sum_hours([name, quantity, _day, _month, _year], %{
+         "all_hours" => all_hours,
+         "hours_per_month" => hours_per_month,
+         "hours_per_year" => hours_per_year
+       }) do
+    all_hours = Map.put(all_hours, name, all_hours[name] + quantity)
+
+    %{
+      "all_hours" => all_hours,
+      "hours_per_month" => hours_per_month,
+      "hours_per_year" => hours_per_year
+    }
   end
 
   defp report_acc do
-    _year = Enum.into(@available_month, %{}, &{&1, 0})
-    users = Enum.into(@user_list, %{}, &{&1, 0})
+    month = Enum.into(@available_month, %{}, &{&1, 0})
+    year = Enum.into(2016..2020, %{}, &{&1, 0})
 
-    %{"users" => users}
+    hours_per_month = Enum.into(@user_list, %{}, &{&1, month})
+    all_hours = Enum.into(@user_list, %{}, &{&1, 0})
+    hours_per_year = Enum.into(@user_list, %{}, &{&1, year})
+
+    %{
+      "all_hours" => all_hours,
+      "hours_per_month" => hours_per_month,
+      "hours_per_year" => hours_per_year
+    }
   end
 end
